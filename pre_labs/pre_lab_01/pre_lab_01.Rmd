@@ -154,7 +154,7 @@ ppp_maryland_loans %>%
 ```
 
 How many records were there for White loans in Anne Arundel County, according to the data?  Put your answer in the space below.
-**Answer**
+**Answer** 1
 
 ### Task 9
 **Task** Run the following codeblock to group the ppp_maryland_loans dataframe by the county for each loan, and then count the number of loans in that group and add up the value of all loans in that group. Then sort so the county with the highest total loan dollar amount is listed first.
@@ -168,7 +168,7 @@ ppp_maryland_loans %>%
   arrange(desc(total_loans_amount))
 ```
 Which county has the highest total dollar amount of loans?  Put your answer in the space below.
-**Answer**
+**Answer** Montgomery County
 
 ### Task 10
 **Task** Run the following codeblock to group the ppp_maryland_loans dataframe by the county for each loan. Then do the following summarizations for each group:count the number of loans , add up the value of all loans, and calculate the mean and median loan amounts. Then sort so the county with the highest mean dollar amount is listed first.
@@ -184,7 +184,7 @@ ppp_maryland_loans %>%
   arrange(desc(mean_loan_amount))
 ```
 Which county has the highest mean loan amount?  Put your answer in the space below.
-**Answer**
+**Answer** Howard County
 ### Task 11
 **Task** Run the following codeblock to group the ppp_maryland_loans dataframe by the county for each loan. Then do the following summarizations for each group:count the number of loans, add up the value of all loans, calculate the mean and median loan amounts and calculate the smallest and largest loans. Then sort so the county with the largest max loan amount is listed first.
 ```{r}
@@ -201,7 +201,7 @@ ppp_maryland_loans %>%
   arrange(desc(max_loan_amount))
 ```
 Which is the max loan amount in Anne Arundel County?  Put your answer in the space below.
-**Answer**
+**Answer** 10000000
 
 ### Task 12
 **Task** Sort the entire dataset so that the biggest loans appear first, allowing you to see which companies got the biggest loans.
@@ -211,4 +211,4 @@ ppp_maryland_loans %>%
 
 ```
 How many companies got $10 million loans? One of them is a restaurant chain.  What kind of food do they serve? Put your answers in the space below.
-**Answer**
+**Answer** Five companies got $10 million loans. One of them is Mission BBQ and they serve BBQ. 
