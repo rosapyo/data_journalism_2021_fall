@@ -110,7 +110,7 @@ Some hints to help you answer this question:
 * When you examine the disclosure forms, there may be lots of stock sales and retirement accounts mixed in.  Ignore those. In the table in the disclosure forms, look for "Partnership" or "C-Corp" in the column named "Income Type"
 * This is a link to details on passage of the [CARES ACT](https://www.congress.gov/bill/116th-congress/house-bill/748). You can find a link to how the House voted by clicking on a link from [this page](https://www.congress.gov/bill/116th-congress/house-bill/748/actions).
 
-A3:The business names are DM MOTOR, INC,	which is a Subchapter S Corporation, DUTCH MILLER OF CHARLESTON, INC, which is a Corporation, 	DUTCH MILLER OF CHARLOTTE, INC,	which is a Subchapter S Corporation, DUTCH MILLER SUBARU, INC, which is a	Subchapter S Corporation, and DUTCH MILLER CHEVROLET, INC., which is	Corporation. In total they received 3105300. The percentage of loans forgiven is
+A3:The business names are DM MOTOR, INC,	which is a Subchapter S Corporation, DUTCH MILLER OF CHARLESTON, INC, which is a Corporation, 	DUTCH MILLER OF CHARLOTTE, INC,	which is a Subchapter S Corporation, DUTCH MILLER SUBARU, INC, which is a	Subchapter S Corporation, and DUTCH MILLER CHEVROLET, INC., which is	Corporation. In total they received 3105300. The percentage of loans forgiven is 101.1326 %. 
 
 ```{r}
 
@@ -123,9 +123,7 @@ wv_ppp_loans %>%
 select(name, business_type, amount, forgiveness_amount)  %>% 
 
 summarise(total_amount = sum(amount),
-         total_forgiveness = sum(amount)
-) %>% 
-
-mutate((total_forgiveness/total_amount)*100)
+         total_forgiveness = sum(forgiveness_amount)) %>% 
+  mutate((total_forgiveness/total_amount)*100) 
 
 ```
