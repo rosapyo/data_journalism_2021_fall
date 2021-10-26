@@ -132,6 +132,7 @@ wv_ppp_loans %>%
 **Q4.** What are your two best hypotheses, which you'd need to confirm with reporting and further analysis, that explain why that industry is at the top of the list?
 
 **A4.** 
+My hypothesis is even though many of the businesses that needed loans were small businesses like mom and pop shop restaurants, there were fraudulent full-service restaurants to get loans as seen in investigating these restaurants did not have actual addresses.
 
 **Q5.** Start with a table of loans to all businesses in the city and industry that answered question 3. Answer the following questions:
 * What is the name of the business that got the highest approved loan amount? 
@@ -144,4 +145,4 @@ wv_ppp_loans %>%
 
 Hint: you will not find the answers to the last three questions in the data.  You could call them directly to get that information, but I don't want you to do that for this assignment.  Instead, do some web research. I would start by Googling the company name from the data and looking at the page that comes up for the business from at http://apps.sos.wv.gov/. I would use information I found on that page and use info about the company from Google, the [Wayback machine](https://archive.org/web/) (which lets you look at older versions of a company's website), Yelp, and Facebook. 
 
-**A5.**
+**A5.** Cottle Christi L LLC had the highest approved loan amount for 280434 on Feburary 17, 2021 and helped retain 94 jobs. There is a difference in the business name as customers know the restaurant as "Kitzie's Cafe" with 6 locations. The location "Kitzie's Restaurant & Lounge" in Rockville Cliff Drive closed during the pandemic before the loan approval. 
