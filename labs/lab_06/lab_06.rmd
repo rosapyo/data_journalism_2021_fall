@@ -53,7 +53,7 @@ Let's load it into R, and in doing so we'll skip the first two rows and add our 
 **Task** Write code to read the CSV file into a dataframe called `international_migration`. As in the pre_lab, you may have to skip 1 or more rows and you may want to supply easier to use column names that use underscores.
 
 ```{r}
-international_migration <- read_csv("data/tabula-md-stats-handbook.csv", skip=2, col_names=c("state_jurisdiction", "july_2010_july_2011", "july_2011_july_2012", "july_2012_july_2013", "july_2013_july_2014", "july_2014_july_2015", "july_2015_july_2016", "july_2016_july_2017", "july_2017_july_2018", "july_2018_july_2019", "everything"))
+international_migration <- read_csv("data/tabula-md-statistical-handbook.csv", skip=2, col_names=c("state_jurisdiction", "july_2010_july_2011", "july_2011_july_2012", "july_2012_july_2013", "july_2013_july_2014", "july_2014_july_2015", "july_2015_july_2016", "july_2016_july_2017", "july_2017_july_2018", "july_2018_july_2019", "everything"))
 ```
 
 Add a column for the type of migration ("international") and populate it:
@@ -62,6 +62,7 @@ Add a column for the type of migration ("international") and populate it:
 
 ```{r}
 # Write the code to add the column here
+
 ```
 
 ## Answer questions
