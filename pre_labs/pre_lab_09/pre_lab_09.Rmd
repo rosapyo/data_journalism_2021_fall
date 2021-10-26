@@ -220,7 +220,7 @@ So, let's create a dataframe with a count of Maryland loans for each date in our
 
 ### Task 12: Run the following code
 **Task** Run the following code. Explain what you see after running the code in the space below. 
-**Answer** 
+**Answer** a graph tthat shows date apprived and total loans
 
 ```{r}
 
@@ -239,7 +239,7 @@ We'll put the date on the x axis and total loans on the y axis.
 
 ### Task 13: Run the following code
 **Task** Run the following code. Explain what you see after running the code in the space below. 
-**Answer**
+**Answer** Made a bar graph of the chart above
 
 ```{r}
 ppp_maryland_loans_by_date %>%
@@ -261,8 +261,8 @@ We'll set the date_breaks to appear for every month; if we wanted every week, we
 
 ### Task 14: Run the following code
 **Task** Run the following code. Explain what you see after running the code in the space below. 
-**Answer**
 
+**Answer**The x and y axis flipped on the line graph
 ```{r}
 ppp_maryland_loans_by_date %>%
   ggplot() + 
@@ -276,7 +276,7 @@ Those are a little hard to read, so we can turn them 45 degrees to remove the ov
 
 ### Task 15: Run the following code
 **Task** Run the following code. Explain what you see after running the code in the space below. 
-**Answer**
+**Answer**The angle for the x axis moved 45 degrees.
 ```{r}
 ppp_maryland_loans_by_date %>%
   ggplot() + 
