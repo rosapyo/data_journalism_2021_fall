@@ -111,4 +111,4 @@ cleaned_md_loans %>%
 
 ```
 ### Task 8: Follow the directions in the textbook to use Open Refine
-**Task** Follow the directions in the textbook to upload ppp_loans_md.csv.zip to Open Refine. Follow the instructions to clean as many cities as the Open Refine clustering tool can identify.  In class, I will come around to look at the Open Refine project you created to do this. okat
+**Task** Follow the directions in the textbook to upload ppp_loans_md.csv.zip to Open Refine. Follow the instructions to clean as many cities as the Open Refine clustering tool can identify.  In class, I will come around to look at the Open Refine project you created to do this. 
