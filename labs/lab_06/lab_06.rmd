@@ -62,16 +62,25 @@ Add a column for the type of migration ("international") and populate it:
 
 ```{r}
 # Write the code to add the column here
+international_migration <- international_migration %>% 
+  mutate(migration_type = as.character("international"))
 
 ```
 
 ## Answer questions
 
 **Q1** Which region and county/city _below_ the state level accounted for the largest percentage of international migration for the entire time period? You'll need to add and populate a column representing percent of total using `mutate`.
-**A1** [write your answer here]
+**A1** 
 
 ```{r}
 # Write the code to produce your answer here
+international_migration <- international_migration%>% 
+mutate(total = sum(everything)) %>% 
+  mutate(percentage = (everything/total)*100)
+international_migration %>% 
+  select(state_jurisdiction, percentage) %>%  
+  arrange(desc(percentage)) %>% 
+  head(5)
 
 ```
 
