@@ -74,8 +74,9 @@ international_migration <- international_migration %>%
 
 ```{r}
 # Write the code to produce your answer here
+
 international_migration <- international_migration%>% 
-mutate(total = sum(everything)) %>% 
+  mutate(total = sum(everything)) %>% 
   mutate(percentage = (everything/total)*100)
 international_migration %>% 
   select(state_jurisdiction, percentage) %>%  
@@ -92,6 +93,12 @@ international_migration %>%
 
 ```{r}
 # Write the code to produce your answer here
+international_migration <- international_migration %>% 
+  mutate(percent_change_2018_2017 = (july_2017_july_2018-july_2016_july_2017)/july_2016_july_2017)
+international_migration %>% 
+  select(state_jurisdiction, percent_change_2018_2017) %>%  
+  arrange(desc(percent_change_2018_2017)) %>% 
+  head(5)
 
 ```
 
@@ -113,6 +120,10 @@ Let's load it into R, and in doing so we'll skip the first two rows and add our 
 
 ```{r}
 # Write the code to load the CSV file here
+domestic_migration <- read_csv("data/tabula-md-stats-handbook-domestic.csv", skip=2, col_names=c("state_jurisdiction", "july_2010_july_2011", "july_2011_july_2012", "july_2012_july_2013", "july_2013_july_2014", "july_2014_july_2015", "july_2015_july_2016", "july_2016_july_2017", "july_2017_july_2018", "july_2018_july_2019", "everything"))
+```
+
+Add a column for the type of migration ("domestic") and populate it:
 ```
 
 Add a column for the type of migration ("domestic") and populate it:

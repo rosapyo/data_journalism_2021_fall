@@ -1,0 +1,161 @@
+---
+title: "Comic Gender Disparity"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+```{r}
+options(scipen=999)
+library(lubridate)
+library(tidyverse)
+library(refinr)
+```
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+Sys.setenv("VROOM_CONNECTION_SIZE" = 131072 * 2)
+```
+```{r}
+
+library(readr)
+dc_wikia_data <- read_csv("data/dc-wikia-data.csv")
+marvel_wikia_data <- read_csv("data/marvel-wikia-data.csv")
+
+
+```
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+```{r}
+#Elie-Percent Female (10 >= appearances)
+```
+
+```{r}
+#Elie-Percent Female (100 >= appearances)
+
+filter1<-filter(dc_wikia_data, APPEARANCES >= 100) 
+filter2<-filter(filter1, SEX != "NA") 
+
+
+total_dc=nrow(filter2)
+female_gender_count<-nrow(filter(filter2, SEX=='Female Characters'))
+
+percentage_of_women_in_dc<-(female_gender_count/total_dc)*100
+print(percentage_of_women_in_dc)
+
+
+barplot(c(percentage_of_women_in_dc, 100-percentage_of_women_in_dc),names.arg=c("Female Ratio", "Male Ratio"), col="light green", main="DC Gender Ratio", xlab="Gender", ylab="Ratio")
+
+
+filter1<-filter(marvel_wikia_data, APPEARANCES >= 100)
+filter2<-filter(filter1, SEX != "NA")
+
+
+total_marvel=nrow(filter2)
+female_gender_count<-nrow(filter(filter2, SEX=='Female Characters'))
+
+percentage_of_women_in_marvel<-(female_gender_count/total_marvel)*100
+
+print(percentage_of_women_in_marvel)
+
+
+barplot(c(percentage_of_women_in_marvel, 100-percentage_of_women_in_marvel),names.arg=c("Female Ratio", "Male Ratio"), col="light green", main="Marvel Gender Ratio", xlab="Gender", ylab="Ratio")
+
+```
+
+```{r}
+#Jerold-Female Marvel Characters
+```
+
+```{r}
+#Rosa-Secret Identities
+dc_men <- dc_wikia_data %>%
+  filter(SEX == "Male Characters") %>%
+  filter (ID != "NA")
+
+dc_men_identities <-
+dc_wikia_data %>%
+  filter(
+    SEX == "Male Characters" & ID == "Secret Identity"
+  )
+dc_men_percent <-
+  dc_men_identities %>%
+  summarize(
+    count_identities = n(),
+    percentage_identity = count_identities / 3422
+  )
+
+dc_women <- dc_wikia_data %>%
+  filter(SEX == "Female Characters") %>%
+  filter (ID != "NA")
+
+dc_women_identities <-
+dc_wikia_data %>%
+  filter(
+    SEX == "Female Characters" & ID == "Secret Identity"
+  )
+dc_women_percent <-
+  dc_women_identities %>%
+  summarize(
+    count_identities = n(),
+    percentage_identity = count_identities / 1390)
+
+marvel_men <- marvel_wikia_data %>%
+  filter(SEX == "Male Characters") %>%
+  filter (ID != "NA")
+
+marvel_men_identities <-
+marvel_wikia_data %>%
+  filter(
+    SEX == "Male Characters" & ID == "Secret Identity"
+  )
+marvel_men_percent <-
+  marvel_men_identities %>%
+  summarize(
+    count_identities = n(),
+    percentage_identity = count_identities / 9128
+    )
+    
+marvel_women <- marvel_wikia_data %>%
+  filter(SEX == "Female Characters") %>%
+  filter (ID != "NA")
+
+marvel_women_identities <-
+marvel_wikia_data %>%
+  filter(
+    SEX == "Female Characters" & ID == "Secret Identity"
+  )
+marvel_women_percent <-
+  marvel_women_identities %>%
+  summarize(
+    count_identities = n(),
+    percentage_identity = count_identities / 3047
+  )
+```
+
+```{r}
+#Tatyana-Alignment by Gender
+female_align <- new_comic %>% 
+  filter(SEX=="Female Characters") %>% 
+  group_by(ALIGN) %>% 
+  summarise(count_ALIGN =n()
+  )
+
+male_align <- new_comic %>% 
+  filter(SEX=="Male Characters") %>% 
+  group_by(ALIGN) %>% 
+  summarise(count_ALIGN =n()
+  )
+
+```
+
