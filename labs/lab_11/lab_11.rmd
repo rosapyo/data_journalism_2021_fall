@@ -22,21 +22,20 @@ knitr::opts_chunk$set(echo = TRUE)
 **Task** Create a codeblock and load appropriate packages and settings for this lab. You'll need tidyverse, tidycensus, janitor, sf and tigris, and you'll also need to install your census API key.
 
 ```{r}
-library(tidyverse)
 library(tidycensus)
+#census_api_key("dddd8ba3acd20567744bf155fb2a95c97717fa56", install=TRUE)
+library(tidyverse)
 library(sf)
 library(janitor)
 library(tigris)
-library(stringr)
-options(tigris_use_cache = TRUE)
-census_api_key("dddd8ba3acd20567744bf155fb2a95c97717fa56", overwrite=TRUE)
 ```
+
 ## Load data
 
 **Task** Create a codeblock and load the WV slice of the PPP loan data, which is in the data folder and is called lab_11.rds.
 
 ```{r}
-WV_PPP_loan_data <- read_rds("data/lab_11.rds")
+wv_ppp_loans <- read_rds("data/lab_11.rds")
 ```
 
 ## Questions 
@@ -51,41 +50,60 @@ Then answer these questions:
 
 * Based on the map, what region of the state appears to have gotten more loans in this industry? What geographic pattern do you notice in the data?
 * Based on the table, what county got the highest total loan amount? What was the total amount per 100K population, the total amount of loans (not population adjusted), how many loans were there, and what's the population?
-
-```{r}
-wv_mining <- WV_PPP_loan_data %>% 
-  filter(str_detect(naics_code,"^21"))
-  
-WV_PPP_loan_data
-```
-```{r}
-wv_loan_per_county <- wv_mining %>% 
-  group_by(project_county_name) %>% 
-    summarize(amount = sum(amount)
-    )%>%
-  arrange(desc(amount))
-
-wv_loan_per_county
-```
-```{r}
-wv_county_population <- get_acs(geography = "county", 
-              variables = c(population = "B01001_001"), 
-              state = "WV",
-              geometry = TRUE)
-
-wv_county_population
-```
-
-```{r}
-wv_county_population <- wv_county_population %>%
-  rename(COUNTY = NAME) %>%
-  mutate(COUNTY = toupper(str_remove_all(COUNTY,", West Virginia|County"))) %>%
-  mutate(COUNTY = str_trim(COUNTY,side="both")) %>%
-  rename(population = estimate) %>%
-  select(COUNTY, population, geometry)
-```
-
 **A1.** 
+The north east has the most loans in this industry, Kanawha County especiaally. A geographic pattern I see is a linear pattern from the south weest to the north east.Harrison county had the highest total loan amount wiht the total amount of loans per 100k of 14,607,650.03, recieving a total of 9,919,762.98, with total of 59 loans, and a population of 67,908.   
+
+```{r}
+wv_ppp_loans
+mining_wv_ppp_loans <- wv_ppp_loans %>% 
+  filter(str_detect(naics_code, "^21")) %>% 
+  rename("county" = "project_county_name") %>% 
+  group_by(county) %>% 
+  summarise(total_loans = sum(amount)) %>% 
+  mutate(county = str_squish(county))
+  
+wv_county_pop <- get_acs(geography = "county",
+                         variables = c(population = "B01001_001"),
+                         state = "WV",
+                         geometry = TRUE)
+wv_county_pop <- wv_county_pop %>% 
+  rename("population" = "estimate") %>%
+  rename("county" = "NAME") %>% 
+  select(-GEOID, -variable, -moe) %>% 
+  mutate(county = toupper(str_remove_all(county,", West Virginia|County"))) %>% 
+  #it kept coming up as NA for the total_loans column... maybe because it's 47 counties with ppp loans associated with mining rather than all 55? 
+  mutate(county = str_squish(county))
+#used the code above to put all the counties in there and keep the NA for the ones without loans. 
+# After noticing that there's only 47 counties with mining company loans, and 55 in the acs data, I did this below to make sure that the numbers are correct..? 
+wv_ppp_loans %>% 
+  filter(str_detect(naics_code, "^21")) %>%
+  group_by(project_county_name) %>% 
+  summarise(total = n()) %>%
+  View()
+#The numbers are correct.
+mining_wv_ppp_loans_per_100k <- wv_county_pop %>% 
+  left_join(mining_wv_ppp_loans, by = "county") %>% 
+  mutate(loans_per_100k = (total_loans/population)*100000) %>% 
+  mutate(total_loans = replace_na(total_loans,0)) %>% 
+  mutate(loans_per_100k = replace_na(loans_per_100k,0))
+ggplot() + 
+  geom_sf(data=mining_wv_ppp_loans_per_100k, aes(fill=loans_per_100k)) + 
+  theme_minimal() +
+  scale_fill_viridis_b(option="magma", trans = "log") 
+#The table.
+mining_wv_ppp_loan_applications <- wv_ppp_loans %>% 
+  filter(str_detect(naics_code, "^21")) %>% 
+  rename("county" = "project_county_name") %>% 
+  group_by(county) %>% 
+  summarise(total_applications = n())
+mining_wv_ppp_all <- mining_wv_ppp_loans %>% 
+  left_join(mining_wv_ppp_loan_applications) 
+mining_wv_ppp_all <- mining_wv_ppp_all %>% 
+  left_join(wv_county_pop) %>% 
+  mutate(loans_per_100k = (total_loans/population)*100000) %>% 
+  arrange(desc(loans_per_100k))
+#Hm. The NA's don't come up in this one...
+```
 
 **Q2.** You want to understand WHY the spatial pattern you saw above exists.  So you grab a shapefile with the latitude and longitude coordinates of every mine permit in West Virginia from the state Department of Environmental Protection. 
 
@@ -99,19 +117,45 @@ Make a map with a point for each one of these mine permits and put a blank map w
 
 What spatial pattern do you see? How does it compare to the spatial pattern in the first map you made?
 
-```{r}
+**A2.** The spatial pattern I see is similar to the one in the first map, a diagonal line. 
 
+```{r}
+operating_mines <- st_read("https://tagis.dep.wv.gov/arcgis/rest/services/WVDEP_enterprise/mining_reclamation/MapServer/0/query?where=1%3D1&outFields=*&geometry=&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outSR=4326&f=json")
+after_sep1_2021_mines <- operating_mines %>% 
+  filter(expiredate >= "2021/09/01") 
+after_sep1_2021_mines %>%
+  ggplot() + 
+  geom_sf() + 
+  theme_minimal()
+counties <- counties() 
+glimpse(counties)
+wv_counties <- counties %>% 
+  filter(STATEFP == "54")
+wv_counties %>%
+  ggplot() + 
+  geom_sf() + 
+  theme_minimal()
+ggplot() + 
+  geom_sf(data=wv_counties, fill = "white") + 
+  geom_sf(data=after_sep1_2021_mines) +
+  theme_minimal()
 ```
 
-**A2.**
+
 
 **Q3.** To confirm the spatial comparison you identified in question 2, let's create a new map that layers the mine location points on top of our PPP choropleth map we created in question 1. What do you notice about the amount of mines in the county that has the highest total loan amount per 100K?
 
-```{r}
+**A3.** I noticed there are zero mines in the county with the highest total loan amount per 100k. 
 
+```{r}
+ggplot() + 
+  geom_sf(data=mining_wv_ppp_loans_per_100k, aes(fill=loans_per_100k)) + 
+  geom_sf(data=after_sep1_2021_mines) +
+  theme_minimal() + 
+  scale_fill_viridis_b(option="magma", trans = "log") 
 ```
 
-**A3.**
+
 
 **Q4.** Starting from the original WV ppp dataframe, examine the loans to companies in "Mining, Quarrying, and Oil and Gas Extraction" in the county with the highest total loan amount per 100K (you can use the table you created in question 1 to identify the top county)?
 * What single company accounts for the biggest chunk of the total loan amount? 
@@ -119,9 +163,12 @@ What spatial pattern do you see? How does it compare to the spatial pattern in t
 * How many jobs did they save, according to the data?
 * What's your hypothesis for why a company in their specific industry would need to seek a PPP loan during the pandemic?
 
+**A4.** The biggest chunk of the loan amount is tthe account Hall Drilling LLC. They are a drilling oil and gas well industry that provides trucking, drilling, production installation, construction and roustabout services. They saved 387 jobs. I think the company in this industry had to seek out PPP loans during the pandemic because people were not working during the pandemic as everyone was trying to figure things out and therefor no one had to use their services especially trucks to move things and no one needed things to be built. 
+
 ```{r}
-
+ritchie_wv_ppp_loans <- wv_ppp_loans %>% 
+  filter(str_detect(naics_code, "^21")) %>% 
+  filter(project_county_name == "RITCHIE") %>% 
+  arrange(desc(amount))
 ```
-
-**A4.**
 -30-
