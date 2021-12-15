@@ -1,0 +1,327 @@
+---
+title: "MD Lobbying Data Analysis"
+authors: Elie, JR, Rosa, Tatyana 
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Turn off scientific notation
+options(scipen=999)
+
+install.packages("ggrepel")
+library(tidyverse)
+library(janitor)
+library(lubridate)
+library(ggrepel)
+library(sf)
+
+```
+
+Loading data frames 
+
+```{r}
+
+#pulled data from 08/01/2018 to present day to give ourselves the chance to compare numbers from covid times to pre-covid times. 
+
+all_registrations <- read_csv("data/registrations.csv") %>%
+  clean_names()
+
+all_activity_reports <- read_csv("data/activity_reports.csv") %>%
+  clean_names()
+
+
+
+
+```
+Taking a peek at the data
+
+
+```{r}
+
+glimpse(all_activity_reports)
+
+#Rows: 10,000 and Columns: 19 from glimpse 
+
+glimpse(all_registrations)
+
+#Rows: 9,819 and Columns: 5 from glimpse
+
+#looking to see how many clients each registered lobbyist has had from 2018 to present day
+
+all_registrations %>% 
+  group_by(lobbyist_registrant) %>% 
+  summarise(total_lobbyists =n()) %>% 
+  arrange(desc(total_lobbyists))
+
+
+
+```
+
+-- ROSA--
+I first needed to clean the registration data specifically the registration period column so I stored it in a new variable new_lobbyist and filtered. I used a straight detector because manually would be so tedious and especially when there are dates that come in a pattern this is the most clever way to find registration dates a year before. 
+
+```{r}
+new_lobbyists_year <-
+  all_registrations %>%  
+  filter(str_detect(registration_period, "12/../20-../../..|../../21-../../.."))
+```
+
+3734 lobbyist have registered in the past year compared to the 9819 lobbyist on the complete list. This is 38 percent of of the complete list. The increase in this past year is probably due to the pandemic being more normalized and people beginning to consume more once again therefore lobbyists are eager to register. This finding is supported by Elie's increase in gift expenses in 2021. 
+
+I wanted to make other time frames dictating what a new lobbyist is and decided to do a two year span as well to account for more of the pandemic. 
+
+```{r}
+new_lobbyists_two_year <-
+  all_registrations %>%  
+  filter(str_detect(registration_period, "12/../19-../../..|../../21-../../.."))
+```
+
+We found there were 3766 lobbyist registered in the past two years. Taking the total number of lobbyist for the two year span minus the one year spans means there was only 32 lobbyists that registered from Dec. 2019 to Dec. 2020. So only 0.003 percent of lobbyist on the list were registered that year.  
+
+JR--
+First I wanted to find education lobbyists so I sorted the data by employer and listed it in descending order. I stored it in a variable so that it would be easier to look through.
+```{r}
+employers <-
+all_registrations %>%
+  group_by(employer) %>%
+  filter(employer == "Teachers") %>%
+  summarize(
+    total_employed = n()) %>%
+  arrange(desc(total_employed))
+  
+```
+I found it too difficult to parse through the amount of data that was still there so I decided to look online for a list of education lobbyists. I found one on opensecrets.org (https://www.opensecrets.org/federal-lobbying/industries/summary?id=W04&cycle=2021). I downloaded the csv file of education lobbyists and imported it into R.
+```{r}
+edu_lobby <- read_csv("C:/Users/jerol/OneDrive - University of Maryland/GitHub/Data Journalism/major_assignments/data_analysis/data/os_education.csv")
+```
+Next I needed to cross reference the education lobbying data and the MD data. I first mutated the edu_lobby data so that the column names I'm merging on would be the same.
+
+```{r}
+md_edu_lobby_bad <-
+edu_lobby %>%
+  left_join(all_registrations, by=c("Client/Parent" = "employer"))
+```
+This method didn't work because the open secrets data was incomplete and didn't perfectly overlap. Instead I'm now going to try filtering for employers who have names including educational terms in the data. Skimming the educational data from open secrets I included some common terms.
+
+```{r}
+md_edu_lobby <-
+  all_activity_reports %>%
+  filter (str_detect(employer, "Education|University|School|Teach|College|Academic"))
+```
+Now that I have data that is narrowed in on education I can start to find differences in spending from 2018-2019 to 2020-2021. Since the dates are presented in a range that sometimes spans multiple years, I decided to base the spending off of the initial or starting date of the reporting period. I did so by using more string detects.
+```{r}
+twenty_twentyone <-
+md_edu_lobby %>%
+  filter(str_detect(reporting_period, "../../20-../../..|../../21-../../.."))
+
+eighteen_nineteen <-
+  md_edu_lobby %>%
+  filter(str_detect(reporting_period, "../../18-../../..|../../19-../../.."))
+
+```
+Now that we have our separated sets we can do some data analysis to see how it has changed over the past few years. To do that we must first change the total_expenses column from a character to a number.
+```{r}
+eighteen_nineteen$total_expenses = as.numeric(gsub("[\\$,]", "", eighteen_nineteen$total_expenses))
+
+twenty_twentyone$total_expenses = as.numeric(gsub("[\\$,]", "", twenty_twentyone$total_expenses))
+```
+2018-2019
+```{r}
+eighteen_nineteen %>%
+summarise(
+    sum_expenses = sum(total_expenses),
+    mean_expenses = mean(total_expenses),
+    median_expenses = median(total_expenses)
+  ) %>% 
+  arrange(desc(sum_expenses))
+```
+2020-2021
+```{r}
+twenty_twentyone %>%
+summarise(
+    sum_expenses = sum(total_expenses),
+    mean_expenses = mean(total_expenses),
+    median_expenses = median(total_expenses)
+  ) %>% 
+  arrange(desc(sum_expenses))
+```
+There's a significant decrease in the mean and median expenditures from '18-'19 to '20-'21. Mean was cut by more than half, while median was cut exactly in half. However, the sum expenses increased. Considering that the number of variables/education lobbyists increased in the dataset from 83 in '18-'19 to 260 in '20-'21. We can see this by summarizing the number of loans below the median amounts and comparing them.
+```{r}
+eighteen_nineteen %>%
+  filter(total_expenses <= 6000) %>%
+  summarize(count=n())
+```
+In '18-'19 there were 42 lobbyists at or below the median total expenses.
+```{r}
+twenty_twentyone %>%
+  filter(total_expenses <= 6000) %>%
+  summarize(count=n())
+```
+In '20-'21 there were 163. Proportionally, the difference is 42/83~51% and 163/260~63%. That 12% difference likely accounts for the gap.
+
+Elie--
+Figuring out the change in lobbying trends from 2019 to 2021 was quite challenging for me.  I began by loading the data related to expenses by reading csv’s into the dataset.  I then cleaned up the data by removing NA values, and did a bit more necessary pre-processing.  I next converted the data to a date format, and then converted the data into a numerical format.  I filtered out the data by on the year, and created columns for each year.  I used the c() setting to combine the years into one graph, and made each bar a different color.  
+
+At this point I was receiving a confusing error, so I showed my work to a friend with R studio expertise, and he showed me how to use the c() function to combine vectors.  I then did the finishing touches of labeling the bar chart.  I did that entire process for both annual gift expenses and total expenses per year.  I walked away with the following insights. 
+1) Year 2021 has the highest gift expenses per year by a significant amount, followed by 2020 &  2019. 
+2) Year 2020 has highest gift expenses per year, followed by 2021 & 2019, but the amount is insignificant.  
+
+Next up, I compared total registrants.  I read the CSV file, got the annual dates, got the “year” based data, and created tables to count the lobby registrants per year.  I combined the years, made a range of colors, and created labels of my bar chart.  I found that 2020 and 2021 overall had pretty similar lobby registrants, so there was not much of a story there.  
+
+Loading data frames 
+
+
+```{r}
+expenses_data <- read.csv("activity_reports.csv") #Loading data related to expenses
+head(expenses_data)
+str(expenses_data)
+
+sum(is.na(expenses_data))     #Checking NA values
+
+expenses_data <- na.omit(expenses_data) #removing Na values 
+
+sum(is.na(expenses_data))     #Checking NA values
+#Data pre-processing
+expenses_data$from <- lubridate::mdy(stringr::str_extract(expenses_data$Reporting.Period,"^.*?(?=-)"))  
+expenses_data$DATE <- lubridate::mdy(stringr::str_extract(expenses_data$Reporting.Period,"(?=-).*?$")) 
+
+#Conversion to date format
+expenses_data$DATE <- as.Date(expenses_data$DATE, format = "%y.%m.%d")
+expenses_data$year <- factor(year(expenses_data$DATE))
+
+#Converting expenses data into desired numerical format
+expenses_data$Gift.expenses<- gsub(",", "", expenses_data$Gift.expenses) 
+expenses_data$Gift.expenses <- as.numeric(gsub("\\$", "",expenses_data$Gift.expenses))
+
+expenses_data$Total.Expenses<- gsub(",", "", expenses_data$Total.Expenses) 
+expenses_data$Total.Expenses <-  as.numeric(gsub("\\$", "",expenses_data$Total.Expenses))
+expenses_data$Total.Expenses
+
+
+#Yearly data
+expenses_data_2019 <-expenses_data %>% filter(year==2019) #Filtering data based on year
+expenses_data_2020 <-expenses_data %>% filter(year==2020)
+expenses_data_2021 <-expenses_data %>% filter(year==2021)
+
+
+
+colSums(expenses_data_2019[,c(18,19)])
+colSums(expenses_data_2020[,c(18,19)])
+colSums(expenses_data_2021[,c(18,19)])
+
+#--------------------------------------Comparison of expenses------------------------------
+#Bar chart of gift expenses
+Year <- c("2019","2020","2021")
+colors = c("pink","orange","brown")
+
+#Gift expenses
+Gift_expense <- c(0,10611.15,22389.45)
+
+
+barplot(Gift_expense,names.arg=Year,xlab="Annual Gift expenses",ylab="Value",col=colors,
+        main="Bar PLot of Annual Gift Expenses",border="red")
+
+#Insight: Year 2021 has highest gift expenses per year followed by 2020 &  2019.
+
+#Bar Chart of Total expenses
+Total_expense <- c(214364.4,53663896.03,48997067.94)
+
+
+barplot(Total_expense,names.arg=Year,xlab="Annual Gift expenses",ylab="Value",col=colors,
+        main="Bar PLot of  Total Expenses per year",border="red")
+#Insight: #Insight: Year 2020 has highest gift expenses per year followed by 2021 &  2019.
+```
+```{r}
+expenses_data <- read.csv("activity_reports.csv") #Loading data related to expenses
+head(expenses_data)
+str(expenses_data)
+
+sum(is.na(expenses_data))     #Checking NA values
+
+expenses_data <- na.omit(expenses_data) #removing Na values 
+
+sum(is.na(expenses_data))     #Checking NA values
+#Data pre-processing
+expenses_data$from <- lubridate::mdy(stringr::str_extract(expenses_data$Reporting.Period,"^.*?(?=-)"))  
+expenses_data$DATE <- lubridate::mdy(stringr::str_extract(expenses_data$Reporting.Period,"(?=-).*?$")) 
+
+#Conversion to date format
+expenses_data$DATE <- as.Date(expenses_data$DATE, format = "%y.%m.%d")
+expenses_data$year <- factor(year(expenses_data$DATE))
+
+#Converting expenses data into desired numerical format
+expenses_data$Gift.expenses<- gsub(",", "", expenses_data$Gift.expenses) 
+expenses_data$Gift.expenses <- as.numeric(gsub("\\$", "",expenses_data$Gift.expenses))
+
+expenses_data$Total.Expenses<- gsub(",", "", expenses_data$Total.Expenses) 
+expenses_data$Total.Expenses <-  as.numeric(gsub("\\$", "",expenses_data$Total.Expenses))
+
+
+#Yearly data
+expenses_data_2019 <-expenses_data %>% filter(year==2019) #Filtering data based on year
+expenses_data_2020 <-expenses_data %>% filter(year==2020)
+expenses_data_2021 <-expenses_data %>% filter(year==2021)
+
+
+
+colSums(expenses_data_2019[,c(18,19)])
+colSums(expenses_data_2020[,c(18,19)])
+colSums(expenses_data_2021[,c(18,19)])
+
+#--------------------------------------Comparison of expenses------------------------------
+#Bar chart of gift expenses
+Year <- c("2019","2020","2021")
+colors = c("pink","orange","brown")
+
+#Accuracy
+Gift_expense <- c(0,10611.15,22389.45)
+
+barplot(Gift_expense,names.arg=Year,xlab="Annual Gift expenses",ylab="Value",col=colors,
+        main="Bar Plot of Annual Gift Expenses",border="red")
+
+#Insight: Year 2021 has highest gift expenses per year followed by 2020 &  2019.
+
+#Bar Chart of Total expenses
+Total_expense <- c(214364.4,53663896.03,48997067.94)
+
+
+barplot(Total_expense,names.arg=Year,xlab="Annual Gift expenses",ylab="Value",col=colors,
+        main="Bar Plot of  Total Expenses per year",border="red")
+#Insight: #Insight: Year 2020 has highest gift expenses per year followed by 2021 &  2019.
+```
+
+Taking a peek at the data
+#Lobby registrants
+
+```{r}
+lobby_registrant <- read.csv("lobbying_registrations.csv")
+names(lobby_registrant)
+
+#Getting annual dates
+lobby_registrant$from <- lubridate::mdy(stringr::str_extract(lobby_registrant$Registration.Period,"^.*?(?=-)"))  
+lobby_registrant$DATE <- lubridate::mdy(stringr::str_extract(lobby_registrant$Registration.Period,"(?=-).*?$")) 
+
+#Getting "year" based data
+lobby_registrant$DATE <- as.Date(lobby_registrant$DATE, format = "%y.%m.%d")
+lobby_registrant$year <- factor(year(lobby_registrant$DATE))
+
+#Counting lobby registrants per year
+table(lobby_registrant$year)
+table(lobby_registrant$year)
+
+
+#Bar chart of lobby registrants per year
+Yearl <- c("2019","2020","2021","2022","2023")
+colorsl = c("pink","orange","brown","red","navyblue")
+
+#Lobby registrants
+lobby_registrants_year <- c(46,3593, 3505, 2355,2 )
+
+
+barplot(lobby_registrants_year,names.arg=Yearl,xlab="Annual Gift expenses",ylab="Value",col=colorsl,
+        main="Bar Plot of Lobby Registrants per year",border="red")
+

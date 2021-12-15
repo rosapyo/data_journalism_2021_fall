@@ -54,6 +54,7 @@ When you do, it should look something like this:
 ### Task: Load image
 **Task** Run the following code to load an image. Describe what you see in the answer space below.
 **Answer**
+I see a list of files labeled hospital with different file ttypes.
 
 ```{r, echo=FALSE}
 knitr::include_graphics(rep("images/geolayers2.png"))
@@ -64,7 +65,7 @@ Simlar to `readr`, the `sf` library has functions to read geographic data. In th
 ### Task: Load data
 **Task** Run the following code to load data. Describe what you see in the answer space below. What columns exist in this data?
 **Answer**
-
+A long list dictating the layers of the hospital
 ```{r}
 hospitals <- st_read("data/Hospitals/Hospitals.shp")
 
@@ -77,7 +78,7 @@ Let's look at just Maryland hospitals. Good news -- `sf` plays very nicely with 
 
 ### Task: Run code
 **Task** Run the following code. Describe the output in the space below.
-**Answer**
+**Answer**Goes through the listt of hospital and sorts for only maryland ones with their names and addresses.
 
 ```{r}
 md_hospitals <- hospitals %>% 
@@ -93,7 +94,7 @@ What kind of hospitals do we have?
 ### Task: Run code
 **Task** Run the following code. Describe the output in the space below.
 **Answer**
-
+Sorts the hospital by the kind they are. 
 ```{r}
 md_hospitals %>%
   group_by(TYPE) %>%
@@ -107,7 +108,7 @@ Let's narrow our data to only look at the 50 "General Acute Care hospitals."
 
 ### Task: Run code
 **Task** Run the following code. Describe the output in the space below.
-**Answer**
+**Answer**Shows thee hospitals that are general acute care with their id, name, and address
 
 ```{r}
 
@@ -125,7 +126,7 @@ We can simply plot them on a longitude-latitude grid using ggplot.
 
 ### Task: Run code
 **Task** Run the following code. Describe the output in the space below.
-**Answer**
+**Answer** maps on a grid with the longitide and latitude where marylaand hospitals are
 
 ```{r}
 md_hospitals %>%
@@ -159,7 +160,7 @@ Now, let's use the counties() function from tigris to pull down a shapefile of a
 
 ### Task: Run code
 **Task** Run the following code. Describe the output in the space below.
-**Answer**
+**Answer** The output is 3233 rows and 18 columns 
 ```{r}
 
 counties <- counties() 
@@ -177,7 +178,7 @@ This county shapefile has all 3233 U.S. counties.  We only want the Maryland cou
 
 ### Task: Run code
 **Task** Run the following code. Describe the output in the space below.
-**Answer**
+**Answer**A chart with 24 obs and 18 var that took the Maryland FP number and only allowed counties sttartung with 24 to be included. 
 
 ```{r}
 md_counties <- counties %>%
@@ -190,6 +191,7 @@ To see what this looks like, let's plot it out with ggplot. We can pretty clearl
 ### Task: Run code
 **Task** Run the following code. Describe the output in the space below.
 **Answer**
+Shows thee state of maryland with county boundaries.
 
 ```{r}
 md_counties %>%
@@ -206,7 +208,7 @@ We're also going to change things up a bit to put the datasets we want to displa
 
 ### Task: Run code
 **Task** Run the following code. Describe the output in the space below.
-**Answer**
+**Answer** The previous map is laayered with the hospital pin points to show where these hospitals are located. 
 
 ```{r}
 
@@ -225,7 +227,7 @@ We can get a sense of where the largest hospitals are, by changing the color of 
 
 ### Task: Run code
 **Task** Run the following code. Describe the output in the space below.
-**Answer**
+**Answer** The dots on the map now indicate how large thee hospitals are by the color of the dots. 
 
 ```{r}
 
@@ -248,7 +250,9 @@ First, let's load the libraries we'll need. We're also going to load tidycensus 
 
 ### Task: Load libraries
 **Task** Run the following code. Describe the output in the space below. Be sure to input your census api key.
-**Answer**
+**Answer** Attaching package: ‘tidycensus’
+
+The following object is masked from ‘package:tigris’:
 
 ```{r}
 library(tidyverse)
@@ -264,7 +268,7 @@ And now let's load the dataframe of hospital information from the previous chapt
 
 ### Task: Run code
 **Task** Run the following code. Describe the output in the space below.
-**Answer**
+**Answer** Gives a chart with hospitals in maryland thaat are acute care hospitals
 
 ```{r}
 md_hospitals <- st_read("data/Hospitals/Hospitals.shp") %>% 
@@ -281,7 +285,7 @@ Each hospital exists inside of a county, so we're going to first calculate the t
 
 ### Task: Run code
 **Task** Run the following code. Describe the output in the space below.
-**Answer**
+**Answer** A chart with the number of beds in each county
 
 ```{r}
 
@@ -302,7 +306,9 @@ Next, we'll go out and get population data for each county from tidycensus.  The
 
 ### Task: Run code
 **Task** Run the following code. Describe the output in the space below.
-**Answer**
+**Answer** Error: Your API call has errors. The API message returned is Sorry, the system is currently undergoing maintenance or is busy. Please try again later..
+
+BUT i assume it shows the county and the population data for each county in maryland
 
 ```{r}
 
@@ -318,7 +324,9 @@ Ultimately, we're going to join this county population table with our beds by co
 
 ### Task: Run code
 **Task** Run the following code. Describe the output in the space below.
-**Answer**
+**Answer** Error: Your API call has errors. The API message returned is Sorry, the system is currently undergoing maintenance or is busy. Please try again later..
+
+I ASSUME population data us added in 
 
 ```{r}
 
@@ -339,7 +347,7 @@ But there's a problem.  The column in our population data that has county names 
 
 ### Task: Run code
 **Task** Run the following code. Describe the output in the space below.
-**Answer**
+**Answer** Error: object 'md_county_population' not found because Error: Your API call has errors. The API message returned is Sorry, the system is currently undergoing maintenance or is busy. Please try again later..
 
 ```{r}
 
@@ -355,7 +363,7 @@ Let's clean the population table. We're going to rename the "NAME" column to "CO
 
 ### Task: Run code
 **Task** Run the following code. Describe the output in the space below.
-**Answer**
+**Answer** because api is down, I assume they clean the data by renaming county as name as well as population as estimate. Theree is the removal of COUNTY,", Maryland|County". 
 
 ```{r}
 md_county_population <- md_county_population %>%
@@ -374,7 +382,7 @@ Now we can join them.
 
 ### Task: Run code
 **Task** Run the following code. Describe the output in the space below.
-**Answer**
+**Answer** Because api isnt working, I assume the two join
 
 ```{r}
 md_beds_per_100k <- md_county_population %>%
@@ -389,7 +397,7 @@ We have two NAs after we join, for Queen Anne's County and Carolina County.  Tha
 
 ### Task: Run code
 **Task** Run the following code. Describe the output in the space below.
-**Answer**
+**Answer**because the way the program is counting bed, wee havee to convert tthe value to 0
 
 ```{r}
 md_beds_per_100k <- md_county_population %>%
@@ -404,7 +412,7 @@ Our final step before visualization, let's calculate the number of beds per 100,
 
 ### Task: Run code
 **Task** Run the following code. Describe the output in the space below.
-**Answer**
+**Answer** To simplify the data they calculate the number of beds by 100,000. 
 
 ```{r}
 md_beds_per_100k <- md_county_population %>%
@@ -423,7 +431,7 @@ Okay, now let's visualize.  We're going to build a choropleth map, with the colo
 
 ### Task: Run code
 **Task** Run the following code. Describe the output in the space below.
-**Answer**
+**Answer** I ASSUME that this graphs eeach county with the colors that show how many beds per 100,000. 
 
 ```{r}
 ggplot() + 
@@ -435,7 +443,7 @@ This map is okay, but the color scale makes it hard to draw fine-grained differe
 
 ### Task: Run code
 **Task** Run the following code. Describe the output in the space below.
-**Answer**
+**Answer**This changes the color scale so it is easier to read
 
 ```{r}
 ggplot() + 
@@ -450,7 +458,7 @@ So let's change the color scale to a "log" scale, which will help us see those d
 
 ### Task: Run code
 **Task** Run the following code. Describe the output in the space below. What patterns do you see?
-**Answer**
+**Answer**the color scale is changed to a log scale to see better. 
 
 ```{r}
 ggplot() + 
