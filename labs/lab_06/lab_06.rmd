@@ -53,28 +53,26 @@ Let's load it into R, and in doing so we'll skip the first two rows and add our 
 **Task** Write code to read the CSV file into a dataframe called `international_migration`. As in the pre_lab, you may have to skip 1 or more rows and you may want to supply easier to use column names that use underscores.
 
 ```{r}
-international_migration <- read_csv("data/tabula-md-statistical-handbook.csv", skip=2, col_names=c("state_jurisdiction", "july_2010_july_2011", "july_2011_july_2012", "july_2012_july_2013", "july_2013_july_2014", "july_2014_july_2015", "july_2015_july_2016", "july_2016_july_2017", "july_2017_july_2018", "july_2018_july_2019", "everything"))
+# Write the code to load the CSV file here
+international_migration <- read_csv("data/tabula-md-stats-handbook.csv", skip=2, col_names=c("state_jurisdiction", "july_2010_july_2011", "july_2011_july_2012", "july_2012_july_2013", "july_2013_july_2014", "july_2014_july_2015", "july_2015_july_2016", "july_2016_july_2017", "july_2017_july_2018", "july_2018_july_2019", "everything"))
 ```
 
 Add a column for the type of migration ("international") and populate it:
 
-**Task** Write the code to add a `migration_type` column to the data and give it the value of "international"
+**Task** Write the code to add a `migration_type` column to the data and populate it with the value of "international"
 
 ```{r}
-# Write the code to add the column here
 international_migration <- international_migration %>% 
   mutate(migration_type = as.character("international"))
-
 ```
+
 
 ## Answer questions
 
 **Q1** Which region and county/city _below_ the state level accounted for the largest percentage of international migration for the entire time period? You'll need to add and populate a column representing percent of total using `mutate`.
-**A1** 
+**A1** The suburbs of Washington and Montgomery County have the laargest percent of internaational migration.
 
 ```{r}
-# Write the code to produce your answer here
-
 international_migration <- international_migration%>% 
   mutate(total = sum(everything)) %>% 
   mutate(percentage = (everything/total)*100)
@@ -86,13 +84,14 @@ international_migration %>%
 ```
 
 **Q2** Write a sentence or two that describes the data you produced in A1. Try to convey the most important idea.
-**A2** [write your answer here]
+
+**A2** Immigrants come to Montgomery County in a higher rate than other counties.  
 
 **Q3** Which region & jurisdiction had the largest percentage change (either negative or positive) for international migration between July 2018 and July 2017? The formula for percentage change is easy to remember: (New-Old)/Old.
-**A3** [write your answer here]
+
+**A3** Kent Jurisdiction in the Upper East Shore Region had the largest percentage change for international migration between July 2018 and July 2017. 
 
 ```{r}
-# Write the code to produce your answer here
 international_migration <- international_migration %>% 
   mutate(percent_change_2018_2017 = (july_2017_july_2018-july_2016_july_2017)/july_2016_july_2017)
 international_migration %>% 
@@ -103,7 +102,7 @@ international_migration %>%
 ```
 
 **Q4** What's your best guess as to why these changes occurred, and in those places in particular?
-**A4** [write your answer here]
+**A4** Montomgery county is a more diverse place than Kent county therefore probabaly a better place to migrate to. 
 
 
 ## Back to Tabula
@@ -119,11 +118,7 @@ Let's load it into R, and in doing so we'll skip the first two rows and add our 
 **Task** Write code to read the CSV file into a dataframe called `domestic_migration`. As in the pre_lab, you may have to skip 1 or more rows and you may want to supply easier to use column names that use underscores. Your work on the international file should serve as a guide.
 
 ```{r}
-# Write the code to load the CSV file here
 domestic_migration <- read_csv("data/tabula-md-stats-handbook-domestic.csv", skip=2, col_names=c("state_jurisdiction", "july_2010_july_2011", "july_2011_july_2012", "july_2012_july_2013", "july_2013_july_2014", "july_2014_july_2015", "july_2015_july_2016", "july_2016_july_2017", "july_2017_july_2018", "july_2018_july_2019", "everything"))
-```
-
-Add a column for the type of migration ("domestic") and populate it:
 ```
 
 Add a column for the type of migration ("domestic") and populate it:
@@ -131,25 +126,28 @@ Add a column for the type of migration ("domestic") and populate it:
 **Task** Write the code to add a `migration_type` column to the data and populate it with the value of "domestic"
 
 ```{r}
-# Write the code to add the column here
+domestic_migration <- domestic_migration %>% 
+  mutate(migration_type = as.character("domestic"))
 ```
 
 ## Answer questions
 **Q5** Which Maryland individual jurisdiction saw the largest net decrease in domestic migration overall?
-**A5** [write your answer here]
+**A5** Baltimore City 
 
 ```{r}
-# Write the code to produce your answer here
-
+domestic_migration %>% 
+  select(state_jurisdiction, everything) %>% 
+  arrange(everything)
 ```
 
 **Q6** How many regions & jurisdictions had net positive migration for July 2017, July 2018 and July 2019 (not just individually but all three together)?
-**A6** [write your answer here]
+**A6** Two regions and 12 jurisdictions had a net positive migration. 
 
 ```{r}
-# Write the code to produce your answer here
-
+domestic_migration %>%
+  filter(july_2016_july_2017 > 0, july_2017_july_2018 > 0, july_2018_july_2019 > 0) %>% 
+  select(state_jurisdiction, july_2016_july_2017, july_2017_july_2018, july_2018_july_2019)
 ```
 
 **Q7** How would you describe this data? Is there a county or region that stands out, and why?
-**A7** [write your answer here]
+**A7** Frederick County stands out in particular because they haev the highest amount which has in the three time periods.
